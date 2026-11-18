@@ -1,23 +1,10 @@
-# -QSR-Data-Mining-Intelligence-Dashboard-
-Developed an interactive QSR Data Mining Intelligence Dashboard to analyze restaurant sales, inventory, and customer purchasing patterns. The project combines Data Mining, Market Basket Analysis, and Business Intelligence to transform transaction data into actionable insights.
-Key features include:
-
-Colab Code Link 🔗 https://colab.research.google.com/drive/1joJ_yeRAlc0MbD3B7S3PCKDjB26px3ay?usp=sharing
-📊 Restaurant sales and revenue trend analysis
-📦 Warehouse and inventory monitoring with low-stock identification
-🛒 Market Basket Analysis using the Apriori Algorithm
-🔗 Association rules based on confidence and lift
-🍔 Data-driven combo meal recommendations
-📈 Interactive dashboard for business decision-making
-# 🍔 QSR Data Mining Intelligence Dashboard
-
-Turning Quick Service Restaurant (QSR) transaction logs into automated inventory alerts and high-margin combo deals[cite: 1, 2].
-
 ## 📌 Overview
 
 Quick Service Restaurants process thousands of daily orders, leaving valuable cross-selling and supply-chain patterns hidden in Point-of-Sale (POS) logs. QSR Data Mining Intelligence is a lightweight, zero-dependency analytics interface built to bridge raw data mining outputs with day-to-day store operations[cite: 1, 2].
 
 Instead of static reports, store managers get an actionable command center that connects daily sales velocity, warehouse depletion, and Apriori association rules directly to POS menu bundling[cite: 1, 2].
+
+Colab Code Link 🔗 https://colab.research.google.com/drive/1joJ_yeRAlc0MbD3B7S3PCKDjB26px3ay?usp=sharing
 
 ## ✨ Core Modules and Capabilities
 
