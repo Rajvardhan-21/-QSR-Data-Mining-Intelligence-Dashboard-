@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QSR Data Mining Insights Dashboard</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        body {
+            background-color: #f8fafc;
+            color: #0f172a;
+            padding: 1.5rem;
+            line-height: 1.5;
+        }
+
+        .header {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 1.25rem 1.75rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            border: 1px solid #e2e8f0;
+        }
+
+        .title-area h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #2563eb, #7c3aed);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .title-area p {
+            font-size: 0.875rem;
+            color: #64748b;
+            margin-top: 0.25rem;
+        }
+
+        .badge {
+            background-color: #eff6ff;
+            color: #1d4ed8;
+            padding: 0.375rem 0.875rem;
+            border-radius: 9999px;
+            font-size: 0.8125rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
+            border: 1px solid #bfdbfe;
+        }
+
+        /* Metrics Grid */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .card {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 1.25rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e2e8f0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+        }
+
+        .card.blue::before { background: #3b82f6; }
+        .card.purple::before { background: #8b5cf6; }
+        .card.emerald::before { background: #10b981; }
+        .card.orange::before { background: #f97316; }
+
+        .card-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #64748b;
+            font-weight: 600;
+            margin-bottom: 0.375rem;
+        }
+
+        .card-val {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        .card-sub {
+            font-size: 0.8125rem;
+            margin-top: 0.375rem;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            font-weight: 500;
+        }
+
+        .card-sub.up { color: #10b981; }
+        .card-sub.down { color: #ef4444; }
+        .card-sub.neutral { color: #94a3b8; }
+
+        /* Main Dashboard Layout */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 1.5rem;
+        }
+
+        .col-8 { grid-column: span 8; }
+        .col-4 { grid-column: span 4; }
+        .col-6 { grid-column: span 6; }
+        .col-12 { grid-column: span 12; }
+
+        @media (max-width: 1024px) {
+            .col-8, .col-4, .col-6 { grid-column: span 12; }
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .section-title {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        .select-input {
+            padding: 0.375rem 0.75rem;
+            border-radius: 6px;
+            border: 1px solid #cbd5e1;
+            background-color: #f8fafc;
+            font-size: 0.8125rem;
+            color: #334155;
+            outline: none;
+            cursor: pointer;
+        }
+
+        /* SVG Sales Chart Styling */
+        .chart-container {
+            width: 100%;
+            height: 260px;
+            position: relative;
+        }
+
+        .chart-svg {
+            width: 100%;
+            height: 100%;
+            overflow: visible;
+        }
+
+        .chart-line {
+            fill: none;
+            stroke: #3b82f6;
+            stroke-width: 3;
+            stroke-linecap: round;
+        }
+
+        .chart-area {
+            fill: url(#blueGradient);
+            opacity: 0.25;
+        }
+
+        .chart-grid-line {
+            stroke: #f1f5f9;
+            stroke-width: 1;
+        }
+
+        .chart-tick {
+            font-size: 10px;
+            fill: #94a3b8;
+        }
+
+        .chart-point {
+            fill: #ffffff;
+            stroke: #3b82f6;
+            stroke-width: 2.5;
+            cursor: pointer;
+            transition: r 0.2s ease;
+        }
+
+        .chart-point:hover {
+            r: 6;
+            fill: #3b82f6;
+        }
+
+        /* Warehouse Inventory Progress Bars */
+        .inventory-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-top: 0.5rem;
+        }
+
+        .inv-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .inv-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.875rem;
+        }
+
+        .inv-name { font-weight: 600; color: #334155; }
+        .inv-qty { color: #64748b; font-size: 0.8125rem; }
+
+        .bar-bg {
+            background-color: #e2e8f0;
+            border-radius: 9999px;
+            height: 8px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .bar-fill {
+            height: 100%;
+            border-radius: 9999px;
+            transition: width 0.5s ease;
+        }
+
+        .bar-blue { background-color: #2563eb; }
+        .bar-orange { background-color: #f97316; }
+        .bar-red { background-color: #ef4444; }
+
+        .btn {
+            display: inline-block;
+            width: 100%;
+            padding: 0.625rem 1rem;
+            background-color: #0f172a;
+            color: #ffffff;
+            text-align: center;
+            font-weight: 600;
+            font-size: 0.875rem;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            margin-top: 1.25rem;
+        }
+
+        .btn:hover { background-color: #1e293b; }
+        .btn-green { background-color: #10b981; }
+        .btn-green:hover { background-color: #059669; }
+
+        /* Tables */
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.875rem;
+        }
+
+        th {
+            background-color: #f8fafc;
+            color: #475569;
+            font-weight: 600;
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid #e2e8f0;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+        }
+
+        td {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid #f1f5f9;
+            color: #334155;
+        }
+
+        tr:last-child td { border-bottom: none; }
+
+        .pill {
+            display: inline-block;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-weight: 700;
+            font-size: 0.75rem;
+        }
+
+        .pill-green { background-color: #d1fae5; color: #065f46; }
+        .pill-yellow { background-color: #fef3c7; color: #92400e; }
+
+        /* Combo Cards */
+        .combo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem;
+        }
+
+        .combo-card {
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 1rem;
+            background: linear-gradient(145deg, #f8fafc, #ffffff);
+            position: relative;
+        }
+
+        .combo-card.purple-border { border-color: #ddd6fe; background: #faf5ff; }
+        .combo-card.blue-border { border-color: #bfdbfe; background: #eff6ff; }
+
+        .combo-tag {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: #8b5cf6;
+            color: #fff;
+            font-size: 0.6875rem;
+            font-weight: 700;
+            padding: 0.2rem 0.5rem;
+            border-bottom-left-radius: 8px;
+            border-top-right-radius: 8px;
+        }
+
+        .combo-title { font-weight: 700; font-size: 1rem; color: #0f172a; margin-bottom: 0.25rem; }
+        .combo-desc { font-size: 0.8125rem; color: #64748b; margin-bottom: 0.75rem; }
+
+        .combo-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-top: 0.5rem;
+        }
+
+        .price-strike { text-decoration: line-through; color: #94a3b8; font-size: 0.75rem; }
+        .price-main { font-size: 1.25rem; font-weight: 800; color: #6d28d9; }
+        .price-blue { color: #1d4ed8; }
+
+        /* Notification Toast */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #0f172a;
+            color: #ffffff;
+            padding: 0.75rem 1.25rem;
+            border-radius: 8px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
+            font-size: 0.875rem;
+            display: none;
+            z-index: 100;
+        }
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <div class="title-area">
+            <h1>QSR Data Mining Intelligence</h1>
+            <p>Interactive analytics dashboard based on restaurant sales and market basket analysis.</p>
+        </div>
+        <div>
+            <span class="badge">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                </svg>
+                System Active
+            </span>
+        </div>
+    </header>
+
+    <div class="metrics-grid">
+        <div class="card blue">
+            <div class="card-label">Total Revenue YTD</div>
+            <div class="card-val">$1,245,670</div>
+            <div class="card-sub up">▲ +12.5% vs last year</div>
+        </div>
+        <div class="card purple">
+            <div class="card-label">Avg Order Value</div>
+            <div class="card-val">$14.32</div>
+            <div class="card-sub up">▲ +3.2% vs last month</div>
+        </div>
+        <div class="card emerald">
+            <div class="card-label">Total Transactions</div>
+            <div class="card-val">86,984</div>
+            <div class="card-sub neutral">● Consistent volume</div>
+        </div>
+        <div class="card orange">
+            <div class="card-label">Avg Basket Size</div>
+            <div class="card-val">2.4 Items</div>
+            <div class="card-sub down">▼ -0.1 vs target</div>
+        </div>
+    </div>
+
+    <div class="dashboard-grid">
+
+        <!-- Topic 1: Restaurant Sales Analysis -->
+        <div class="card col-8">
+            <div class="section-header">
+                <h2 class="section-title">1. Restaurant Sales Analysis (Daily)</h2>
+                <select class="select-input" onchange="showToast('Sales view updated!')">
+                    <option>Last 30 Days</option>
+                    <option>Last Quarter</option>
+                    <option>Year to Date</option>
+                </select>
+            </div>
+            
+            <div class="chart-container">
+                <svg class="chart-svg" viewBox="0 0 500 200" preserveAspectRatio="none">
+                    <defs>
+                        <linearGradient id="blueGradient" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stop-color="#3b82f6" />
+                            <stop offset="100%" stop-color="#ffffff" />
+                        </linearGradient>
+                    </defs>
+
+                    <!-- Horizontal Grid lines -->
+                    <line x1="30" y1="30" x2="490" y2="30" class="chart-grid-line" />
+                    <line x1="30" y1="80" x2="490" y2="80" class="chart-grid-line" />
+                    <line x1="30" y1="130" x2="490" y2="130" class="chart-grid-line" />
+                    <line x1="30" y1="170" x2="490" y2="170" class="chart-grid-line" />
+
+                    <!-- Y-Axis Labels -->
+                    <text x="5" y="34" class="chart-tick">$6k</text>
+                    <text x="5" y="84" class="chart-tick">$4k</text>
+                    <text x="5" y="134" class="chart-tick">$2k</text>
+                    <text x="5" y="174" class="chart-tick">$0</text>
+
+                    <!-- Filled Area -->
+                    <polygon points="30,170 30,130 80,110 130,140 180,90 230,120 280,60 330,85 380,45 430,70 480,35 480,170" class="chart-area" />
+
+                    <!-- Chart Line -->
+                    <polyline points="30,130 80,110 130,140 180,90 230,120 280,60 330,85 380,45 430,70 480,35" class="chart-line" />
+
+                    <!-- Data Points -->
+                    <circle cx="30" cy="130" r="4" class="chart-point" />
+                    <circle cx="80" cy="110" r="4" class="chart-point" />
+                    <circle cx="130" cy="140" r="4" class="chart-point" />
+                    <circle cx="180" cy="90" r="4" class="chart-point" />
+                    <circle cx="230" cy="120" r="4" class="chart-point" />
+                    <circle cx="280" cy="60" r="4" class="chart-point" />
+                    <circle cx="330" cy="85" r="4" class="chart-point" />
+                    <circle cx="380" cy="45" r="4" class="chart-point" />
+                    <circle cx="430" cy="70" r="4" class="chart-point" />
+                    <circle cx="480" cy="35" r="4" class="chart-point" />
+
+                    <!-- X-Axis Labels -->
+                    <text x="25" y="192" class="chart-tick">Week 1</text>
+                    <text x="175" y="192" class="chart-tick">Week 2</text>
+                    <text x="325" y="192" class="chart-tick">Week 3</text>
+                    <text x="460" y="192" class="chart-tick">Week 4</text>
+                </svg>
+            </div>
+        </div>
+
+        <!-- Topic 2: Warehouse Daily Sales -->
+        <div class="card col-4">
+            <div class="section-header">
+                <h2 class="section-title">2. Warehouse / Inventory</h2>
+            </div>
+            <p style="font-size: 0.8125rem; color: #64748b; margin-bottom: 1rem;">Daily item depletion monitor for restocking.</p>
+
+            <div class="inventory-list">
+                <div class="inv-item">
+                    <div class="inv-meta">
+                        <span class="inv-name">Burger Patties</span>
+                        <span class="inv-qty">1,245 units</span>
+                    </div>
+                    <div class="bar-bg">
+                        <div class="bar-fill bar-blue" style="width: 85%;"></div>
+                    </div>
+                </div>
+
+                <div class="inv-item">
+                    <div class="inv-meta">
+                        <span class="inv-name">Fries (Lbs)</span>
+                        <span class="inv-qty">890 lbs</span>
+                    </div>
+                    <div class="bar-bg">
+                        <div class="bar-fill bar-orange" style="width: 70%;"></div>
+                    </div>
+                </div>
+
+                <div class="inv-item">
+                    <div class="inv-meta">
+                        <span class="inv-name">Cola Syrup (Gal)</span>
+                        <span class="inv-qty">45 gal</span>
+                    </div>
+                    <div class="bar-bg">
+                        <div class="bar-fill bar-blue" style="width: 40%;"></div>
+                    </div>
+                </div>
+
+                <div class="inv-item">
+                    <div class="inv-meta">
+                        <span class="inv-name" style="color: #ef4444;">Chicken Breasts (Low!)</span>
+                        <span class="inv-qty">95 units</span>
+                    </div>
+                    <div class="bar-bg">
+                        <div class="bar-fill bar-red" style="width: 15%;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn" onclick="showToast('Restock order generated for Warehouse!')">Generate Restock Order</button>
+        </div>
+
+        <!-- Topic 3: Market Basket Analysis -->
+        <div class="card col-6">
+            <div class="section-header">
+                <h2 class="section-title">3. Market Basket Analysis</h2>
+            </div>
+            <p style="font-size: 0.8125rem; color: #64748b; margin-bottom: 1rem;">Top association rules generated using the Apriori algorithm.</p>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Antecedent (If buys...)</th>
+                            <th>Consequent (Then buys...)</th>
+                            <th style="text-align: center;">Confidence</th>
+                            <th style="text-align: center;">Lift</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Burger</strong></td>
+                            <td>Fries</td>
+                            <td style="text-align: center;"><span class="pill pill-green">78%</span></td>
+                            <td style="text-align: center; font-weight: 700; color: #2563eb;">2.14</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Cheeseburger</strong></td>
+                            <td>Cola</td>
+                            <td style="text-align: center;"><span class="pill pill-green">65%</span></td>
+                            <td style="text-align: center; font-weight: 700; color: #2563eb;">1.85</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Chicken Sandwich</strong></td>
+                            <td>Onion Rings</td>
+                            <td style="text-align: center;"><span class="pill pill-yellow">42%</span></td>
+                            <td style="text-align: center; font-weight: 700; color: #2563eb;">1.50</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Hot Dog</strong></td>
+                            <td>Sprite</td>
+                            <td style="text-align: center;"><span class="pill pill-yellow">38%</span></td>
+                            <td style="text-align: center; font-weight: 700; color: #2563eb;">1.25</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Topic 4: Combo Meal Recommendations -->
+        <div class="card col-6">
+            <div class="section-header">
+                <h2 class="section-title">4. Combo Meal Recommendations</h2>
+            </div>
+            <p style="font-size: 0.8125rem; color: #64748b; margin-bottom: 1rem;">Optimized bundle pricing derived from high-lift item pairs.</p>
+
+            <div class="combo-grid">
+                <div class="combo-card purple-border">
+                    <span class="combo-tag">High Lift</span>
+                    <div class="combo-title">The Classic Combo</div>
+                    <div class="combo-desc">🍔 Burger + 🍟 Fries</div>
+                    <div class="combo-footer">
+                        <div>
+                            <div class="price-strike">$8.98</div>
+                            <div class="price-main">$7.65</div>
+                        </div>
+                        <span style="font-size: 0.75rem; color: #6d28d9; font-weight: 600;">15% Off</span>
+                    </div>
+                </div>
+
+                <div class="combo-card blue-border">
+                    <div class="combo-title">Cheese & Chill</div>
+                    <div class="combo-desc">🧀 Cheeseburger + 🥤 Cola</div>
+                    <div class="combo-footer">
+                        <div>
+                            <div class="price-strike">$8.98</div>
+                            <div class="price-main price-blue">$7.99</div>
+                        </div>
+                        <span style="font-size: 0.75rem; color: #1d4ed8; font-weight: 600;">11% Off</span>
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn btn-green" onclick="showToast('New Combo pushed to POS Terminal successfully!')">Push New Combo to POS System</button>
+        </div>
+
+    </div>
+
+    <!-- Notification Toast Element -->
+    <div id="toast" class="toast">Action completed successfully.</div>
+
+    <script>
+        function showToast(message) {
+            var toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.style.display = 'block';
+            setTimeout(function() {
+                toast.style.display = 'none';
+            }, 2500);
+        }
+    </script>
+</body>
+</html>
